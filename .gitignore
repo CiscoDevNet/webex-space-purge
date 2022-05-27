@@ -1,0 +1,7 @@
+.vscode/settings.json
+__pycache__/
+webex_space_purge.db
+venv/
+.env
+.DS_Store
+purge_list.csv

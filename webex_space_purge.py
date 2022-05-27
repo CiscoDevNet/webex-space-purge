@@ -29,7 +29,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv(override=True)
 
-database = 'space_purge.db'
+database = 'webex_space_purge.db'
 conn = sqlite3.connect(database)
 conn.row_factory = sqlite3.Row
 
@@ -60,8 +60,9 @@ except ApiError as e:
 
 print(f'Target space: {roomName}')
 
-if not os.getenv('skipDownload') == 'True':
-    import_data.importData(api, conn, accessToken, roomId, cutOffDate)
+keepDomain=os.getenv('KEEP_DOMAIN')
+
+import_data.importData(api, conn, accessToken, roomId, cutOffDate, keepDomain)
 
 cursor = conn.cursor()
 
@@ -96,12 +97,21 @@ if not input(f'Removing {count} users from space.  Enter "CONFIRM" to proceed: '
     sys.exit(0)
 
 count=0
+error_count=0
 
 print('\nDeleting memberships: ', end='')
 
-for row in rows:
-    count+=1
-    print(f'\rDeleting memberships: {count}', end='')
-    # api.memberships.delete(row['id']) //enable this line to actually purge users
+with open('purge_log.log', 'w', encoding='utf-8') as outfile:
+    for row in rows:
+        count+=1
+        print(f'\rDeleting memberships: {count}', end='')
+        try:
+            api.memberships.delete(row['id']) #enable this line to actually purge users
+        except ApiError as e:
+            error_count+=1
+            outfile.write(f'Error deleting: {row["id"]} - {e}\n')
+
+if error_count > 0 :
+    print(f'\nErrors encountered: {error_count}\nSee purge_log.log for details')
 
 print('\nDone!')    

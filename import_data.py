@@ -19,9 +19,9 @@
 
 import sys
 from datetime import datetime
-from webexteamssdk import ApiError
+from webexteamssdk import ApiError,RateLimitWarning
 
-def importData(api, conn, teamsAccessToken, roomId, cutOffDate):
+def importData(api, conn, teamsAccessToken, roomId, cutOffDate, keepDomain):
 
     cursor = conn.cursor()
     try:
@@ -100,24 +100,34 @@ def importData(api, conn, teamsAccessToken, roomId, cutOffDate):
     print('\nImporting memberships: ', end = '')
 
     count = 0
+    keepCount = 0
+    data = []
 
     try:
         memberships = api.memberships.list(roomId=roomId)
+
+        for membership in memberships:
+            count += 1
+
+            print(f'\rImporting memberships: {count}', end='')
+            
+            if keepDomain is not None:
+                if membership.personEmail.endswith(keepDomain):
+                    keepCount+=1
+                    continue
+            data.append((
+                membership.id,
+                membership.personId,
+                membership.personEmail,
+            ))
+    except RateLimitWarning:
+        pass
     except ApiError as e:
         print(f'Error listing memberships: {e}')
         sys.exit(1)
 
-    data = []
-    for membership in memberships:
-        count += 1
-        print(f'\rImporting memberships: {count}', end='')
-        
-        data.append((
-            membership.id,
-            membership.personId,
-            membership.personEmail,
-        ))
+    if keepCount > 0:
+        print(f'\nExcluded {keepCount} users with email ending in "{keepDomain}" ')
 
     cursor.executemany('INSERT INTO memberships VALUES (?,?,?)', data)
     conn.commit()    
-    print()

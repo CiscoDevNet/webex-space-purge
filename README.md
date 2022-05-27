@@ -33,29 +33,29 @@ Tested using:
 
 * Clone this repo to a directory on your PC:
 
-    ```bash
-    git clone https://github.com/CiscoDevNet/webex-space-purge.git
-    cd webex-space-purge
-    ```
+  ```bash
+  git clone https://github.com/CiscoDevNet/webex-space-purge.git
+  cd webex-space-purge
+  ```
 
 * (Optional) Create and activate a Python virtual environment:
 
-    ```bash
-    python3 -m venv venv
-    source venv/bin/activate
-    ```
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
 
 * Dependency Installation:
 
-    ```bash
-    pip install -r requirements.txt
-    ```
+  ```bash
+  pip install -r requirements.txt
+  ```
   
 * Open the project in VS Code:
 
-    ```bash
-    code .
-    ```
+  ```bash
+  code .
+  ```
 
 * Visit [https://developer.webex.com/docs/getting-started#accounts-and-authentication), login, and copy your personal access token
 
@@ -63,25 +63,26 @@ Tested using:
 
     * Rename `.env.example` to `.env` and edit to configure
 
+    * For absolute safety, line 105 in webex_space_purge.py is commented out:
+
+      ```python
+      # api.memberships.delete(row['id'])
+      ```
+
+      Uncomment this line to arm the code for real purging!
+
     * Press **F5** to run the application
 
       or
 
       ```
       python webex_space_purge.py
+      ```
 
-> **Note:** at the moment, line 105 in webex_space_purge.py is commented out:
+* After messages/memberships are retrieved and the list of users to be purged is tallied, the target Webex user emails will be written to `purge_list.txt`.
 
-  ```python
-  api.memberships.delete(row['id'])
-  ```
-
-  Uncomment this line to arm the code for real purging!
-
-* After messages/memberships are retrieved and the list of users to be purged is queried, the Webex user email will be written to `purge_list.txt`.
-
-  You may want to examine this file as a sanity check.
+  You may want to examine this file as a sanity check before proceeding.
 
 * Finally: you will be asked to type in `CONFIRM` before any users are actually purged.
 
-> **Note:** If something goes wrong, it should theoretically be possible to recreate purged memberships based on the purge_list.txt file.
+> **Note:** If something goes wrong, it should _theoretically_ be possible to recreate purged the memberships based on the `purge_list.txt` file.

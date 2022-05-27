@@ -83,7 +83,7 @@ if len(rows) < 1:
 
 print('\nWriting records to file: ', end = '' )
 
-with open( 'purge_list.csv', 'w', encoding = 'utf-8' ) as outfile:
+with open( 'purge_list.txt', 'w', encoding = 'utf-8' ) as outfile:
     count=0
     for row in rows:
         count+=1
